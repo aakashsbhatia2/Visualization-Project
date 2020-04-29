@@ -12,6 +12,77 @@ def index():
     global df
     data = stratified_samples(df)
     return render_template("index.html", data = data)
+    # return render_template("index.html")
+
+@app.route("/getusmapdata", methods = ['GET', 'POST'])
+def get_map_data():
+    global df
+
+    us_states = pd.read_json("templates/us-states.json")
+
+    featurerecords = us_states[["features"]].to_dict(orient="records")
+    # print(featurerecords)
+    maparr = []
+
+    for state in featurerecords:
+        # record = {}
+        # record['feature'] = state
+        # mapdata.append(record)
+        maparr.append(state['features'])
+
+    # print(record['feature']['features'])
+
+    mapdata = {}
+    mapdata['features'] = maparr
+
+    print(mapdata['features'])
+    if request.method == 'POST':
+        chart_data = json.dumps(mapdata, indent=2)
+        data = {'chart_data': chart_data}
+        return jsonify(data)
+    return render_template("index.html")
+
+@app.route("/getstatesdata", methods = ['GET', 'POST'])
+def get_states_lived():
+    global df
+    stateslived = pd.read_csv("templates/statesdata.csv")
+    stateslived = stateslived.set_index("state", drop=False)
+    stateslived = stateslived.to_dict(orient = "records")
+
+    statedata = []
+
+    for state in stateslived:
+        record = {}
+        record['state'] = state['state']
+        record['value'] = state['value']
+        statedata.append(record)
+
+    print(stateslived[0]['state'])
+    if request.method == 'POST':
+        chart_data = json.dumps(statedata, indent=2)
+        data = {'chart_data': chart_data}
+        return jsonify(data)
+    return render_template("index.html")
+
+@app.route("/getcitieslived", methods = ['GET', 'POST'])
+def get_cities_lived():
+    global df
+    citieslived = pd.read_csv("templates/cities-lived.csv").to_dict(orient = "records")
+    citydata = []
+
+    for city in citieslived:
+        record = {}
+        record['lat'] = city['lat']
+        record['lon'] = city['lon']
+        record['place'] = city['place']
+        record['years'] = city['years']
+        citydata.append(record)
+
+    if request.method == 'POST':
+        chart_data = json.dumps(citydata, indent=2)
+        data = {'chart_data': chart_data}
+        return jsonify(data)
+    return render_template("index.html")
 
 """@app.route("/stratified-samples", methods = ['POST'])
 def get_elbow():
