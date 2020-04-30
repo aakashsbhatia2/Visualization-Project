@@ -33,8 +33,64 @@ body {
 <script>
 
     var data = {{data.chart_data |safe}};
-    console.log(data);
-    console.log("Hello World!")
+    console.log(data[0]);
+
+    var us_state_fullform = {'AL': 'Alabama',
+                             'AK': 'Alaska',
+                             'AS': 'American Samoa',
+                             'AZ': 'Arizona',
+                             'AR': 'Arkansas',
+                             'CA': 'California',
+                             'CO': 'Colorado',
+                             'CT': 'Connecticut',
+                             'DE': 'Delaware',
+                             'DC': 'District of Columbia',
+                             'FL': 'Florida',
+                             'GA': 'Georgia',
+                             'GU': 'Guam',
+                             'HI': 'Hawaii',
+                             'ID': 'Idaho',
+                             'IL': 'Illinois',
+                             'IN': 'Indiana',
+                             'IA': 'Iowa',
+                             'KS': 'Kansas',
+                             'KY': 'Kentucky',
+                             'LA': 'Louisiana',
+                             'ME': 'Maine',
+                             'MD': 'Maryland',
+                             'MA': 'Massachusetts',
+                             'MI': 'Michigan',
+                             'MN': 'Minnesota',
+                             'MS': 'Mississippi',
+                             'MO': 'Missouri',
+                             'MT': 'Montana',
+                             'NE': 'Nebraska',
+                             'NV': 'Nevada',
+                             'NH': 'New Hampshire',
+                             'NJ': 'New Jersey',
+                             'NM': 'New Mexico',
+                             'NY': 'New York',
+                             'NC': 'North Carolina',
+                             'ND': 'North Dakota',
+                             'MP': 'Northern Mariana Islands',
+                             'OH': 'Ohio',
+                             'OK': 'Oklahoma',
+                             'OR': 'Oregon',
+                             'PA': 'Pennsylvania',
+                             'PR': 'Puerto Rico',
+                             'RI': 'Rhode Island',
+                             'SC': 'South Carolina',
+                             'SD': 'South Dakota',
+                             'TN': 'Tennessee',
+                             'TX': 'Texas',
+                             'UT': 'Utah',
+                             'VT': 'Vermont',
+                             'VI': 'Virgin Islands',
+                             'VA': 'Virginia',
+                             'WA': 'Washington',
+                             'WV': 'West Virginia',
+                             'WI': 'Wisconsin',
+                             'WY': 'Wyoming'};
 
     var uri = "http://127.0.0.1:5000/";
 
@@ -42,8 +98,11 @@ body {
     var width = 960;
     var height = 500;
 
-    var lowColor = '#f9f9f9';
-    var highColor = '#bc2a66';
+    // var lowColor = '#f9f9f9';
+    // var highColor = '#bc2a66';
+
+    var lowColor = '#7FB3D5';
+    var highColor = '#2471A3';
 
     // D3 Projection
     var projection = d3.geoAlbersUsa()
@@ -60,12 +119,110 @@ body {
       .attr("width", width)
       .attr("height", height);
 
+    var tooltip = d3.select("body").append("div").attr("class", "toolTip")
+          				        .style("position", "absolute")
+        		              .style("z-index", "10")
+        			           .style("visibility", "hidden")
+      			              .style("background", "#E0F8F1")
+    			                 .style("border", "1px solid #6F257F")
+  		                    .style("padding", "14px");
+
     var url = uri + "getstatesdata";
+
+    var wid = 500;
+    var hgt = 400;
+
+    var graphdiv = d3.select("body")
+                      .append("div")
+                      .attr("id", "graphdiv");
+
+    function showStateBars(state) {
+      document.getElementById("graphdiv").innerHTML = "";
+      var statedata = [],
+          cityCount = {};
+      for (var i = 0; i < data.length; i++) {
+        var datastate = us_state_fullform[data[i].State];
+        if(datastate == state) {
+          console.log("Inside state bars for state: " + datastate);
+          statedata.push(data[i]);
+        }
+      }
+
+      console.log(statedata);
+
+      for(var i = 0; i < statedata.length; i++) {
+        if(statedata[i].City in cityCount) {
+          cityCount[statedata[i].City] += 1;
+        }
+        else if(Object.keys(cityCount).length < 12){
+          cityCount[statedata[i].City] = 1;
+        }
+      }
+
+      console.log(cityCount);
+
+      var cities = Object.keys(cityCount);
+      var count = Object.values(cityCount);
+
+      var xScale = d3.scaleBand().range([0, wid]).padding(0.1)
+        												.domain(cities)
+        												.range([0, wid]);
+
+
+      var x_axis = d3.axisBottom()
+      				.scale(xScale);
+
+      var svg2 = graphdiv.append("svg")
+                          .attr("width", wid + 800)
+                          .attr("height", hgt + 500);
+
+      svg2.append("g")
+            	.attr("transform", "translate(100, " + 460  +")")
+            	.call(x_axis)
+            	.selectAll("text")
+            	.style("text-anchor", "end")
+            	.attr("dx", "-.8em")
+            	.attr("dy", ".15em")
+            	.attr("transform", "rotate(-65)");
+
+      var yScale = d3.scaleLinear()
+            				.domain([d3.min(count), d3.max(count)])
+            				.range([hgt, 0]);
+
+      var y_axis = d3.axisLeft()
+      				.scale(yScale);
+
+      svg2.append("g")
+      .attr("transform", "translate(100, 60)")
+      .call(y_axis);
+
+      var citydata = []
+      for(var city in cityCount) {
+        var record = {};
+        record['key'] = city;
+        record['value'] = cityCount[city];
+        citydata.push(record);
+      }
+      console.log("xScale bandwidth: " + xScale.bandwidth());
+
+      svg2.selectAll(".bar")
+      				.data(citydata)
+      				.enter()
+      				.append("rect")
+      				.attr("class", "bar")
+              .attr("x", function(d) {
+                                console.log(d);
+                                return xScale(d.key); })
+    					.attr("y", function(d) { return yScale(d.value); })
+    					.attr("width", 20)
+              .attr("height", function(d) { return 400 - yScale(d.value);})
+              .attr("transform", "translate(" + 110 + "," + 60 + ")")
+              .style("fill", "#81DAF5");
+    }
 
     // Load in my states data!
     $.post(url, function(data) {
       data = JSON.parse(data.chart_data);
-      console.log("statesdata : " + data);
     	var dataArray = [];
     	for (var d = 0; d < data.length; d++) {
     		dataArray.push(parseFloat(data[d].value))
@@ -87,8 +244,6 @@ body {
           // Grab data value
           var dataValue = data[i].value;
 
-          console.log("json.features: " + JSON.stringify(json.features));
-
           // Find the corresponding state inside the GeoJSON
           for (var j = 0; j < json.features.length; j++) {
             var jsonState = json.features[j].properties.name;
@@ -109,10 +264,41 @@ body {
           .data(json.features)
           .enter()
           .append("path")
+          .on("mousemove", function(d) {
+            var htm = d.properties.name + "<br>" + "Number of accidents: " + d.properties.value;
+            // d3.select(this)
+            // 	.style("fill", "#FF6347");
+              tooltip
+              .style("left", d3.event.pageX - 50 + "px")
+              .style("top", d3.event.pageY - 70 + "px")
+              .style("display", "inline-block")
+              .style("visibility", "visible")
+              .html(htm);
+          })
+          .on("mouseover", function(d,i) {
+              d3.select(this)
+                .style("stroke", "#E74C3C")
+                .style("stroke-width", "25")
+                .style("fill", "#E74C3C");
+          })
+          .on("mouseout", function(d, i) {
+              d3.select(this)
+                .style("stroke", "#fff")
+                .style("stroke-width", "1")
+                .style("fill", ramp(d.properties.value));
+              tooltip.style("display", "none")
+          })
           .attr("d", path)
           .style("stroke", "#fff")
           .style("stroke-width", "1")
-          .style("fill", function(d) { return ramp(d.properties.value) });
+          .style("fill", function(d) { return ramp(d.properties.value) })
+          .on('click', function(d) {
+            // return d3.select(this).attrs({
+            //   fill: 'red'
+            // });
+            showStateBars(d.properties.name);
+            console.log("Clicked " + d.properties.name);
+          });
 
     		// add a legend
     		var w = 140, h = 300;
