@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<style type="text/css">
+
+</style>
+<head>
+    <title>Final Project</title>
+</head>
+<body>
+<body>
+</body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+
+    var margin = {top: 20, right: 20, bottom: 90, left: 50},
+    margin2 = {top: 230, right: 20, bottom: 30, left: 50},
+    width = 600 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom,
+    height2 = 300 - margin2.top - margin2.bottom;
+
+	var svg = d3.select("body").append("svg")
+				.attr("width",width+margin.left+margin.right)
+				.attr("height",height+margin.top+margin.bottom);
+
+	var focus = svg.append("g")
+				.attr("transform","translate("+margin.left+","+margin.top+")");
+	var context = svg.append("g")
+				.attr("transform","translate("+margin2.left+","+margin2.top+")");
+
+	var dataset = [4,2,6,13,4,8,32,19,10,12,2,15];
+	var maxHeight=d3.max(dataset,function(d){return d});
+	var minHeight=d3.min(dataset,function(d){return d});
+
+	var yScale = d3.scaleLinear()
+                .range([0,height])
+                .domain([maxHeight,0]);
+
+	var xScale = d3.scaleBand()
+                .rangeRound([0,width])
+                .padding(0.1)
+	            .domain(d3.range(0,dataset.length,1));
+
+	var yScale2 = d3.scaleLinear()
+        .range([0,height2])
+        .domain([maxHeight,0]);
+
+	var xScale2 = d3.scaleBand()
+        .rangeRound([0,width])
+        .padding(0.1)
+    	.domain(d3.range(0,dataset.length,1));
+
+	var yAxis = d3.axisLeft(yScale)
+                    .tickSize(-width);
+
+	var yAxisGroup = focus.append("g").call(yAxis);
+
+	var xAxis = d3.axisBottom(xScale).tickSize(-height);
+	var xAxisGroup = focus.append("g").call(xAxis)
+                    .attr("transform", "translate(0,"+height+")");
+
+	var xAxis2 = d3.axisBottom(xScale2);
+	var xAxisGroup2 = context.append("g").call(xAxis2)
+        .attr("transform", "translate(0,"+height2+")");
+
+	var bars1 = focus.selectAll("rect")
+        .data(dataset)
+        .enter()
+        .append("rect")
+	    .attr("x",function(d,i){ return xScale(i);})
+	    .attr("y",function(d){ return yScale(d);})
+        .attr("width", xScale.bandwidth())
+        .attr("height", function(d){ return height-yScale(d);})
+	    .attr("fill",function(d){ return "steelblue"; });
+
+	var bars2 = context.selectAll("rect")
+        .data(dataset)
+        .enter()
+        .append("rect")
+        .attr("x",function(d,i){ return xScale2(i);})
+	    .attr("y",function(d){ return yScale2(d);})
+	    .attr("width", xScale2.bandwidth())
+	    .attr("height", function(d){ return height2-yScale2(d); })
+	    .attr("fill",function(d){ return "steelblue"; });
+
+	var brush = d3.brushX()
+				.extent([[0,0],[width,height2]])
+				.on("brush",brushed)
+				.on("end",brushend);
+	context.append("g")
+		.attr("class","brush")
+		.call(brush)
+		.call(brush.move,xScale2.range());
+
+
+
+	function brushed(){
+		if (!d3.event.sourceEvent) return;
+  		if (!d3.event.selection) return;
+		if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return;
+		var newInput = [];
+		var brushArea = d3.event.selection;
+		if(brushArea === null) brushArea = xScale.range();
+
+		xScale2.domain().forEach(function(d){
+			var pos = xScale2(d) + xScale2.bandwidth()/2;
+			if (pos >= brushArea[0] && pos <= brushArea[1]){
+			  newInput.push(d);
+			}
+		});
+
+		xScale.domain(newInput);
+		bars1.attr("x",function(d,i){
+			return xScale(i);
+		})
+		.attr("y",function(d){
+			return yScale(d);
+		})
+		.attr("width", xScale.bandwidth())
+		.attr("height", function(d,i){
+			if(xScale.domain().indexOf(i) === -1){
+				return 0;
+			}
+			else
+				return height-yScale(d);
+		})
+
+		xAxisGroup.call(xAxis);
+	}
+	function brushend(){
+		if (!d3.event.sourceEvent) return; // Only transition after input.
+  		if (!d3.event.selection) return; // Ignore empty selections.
+		if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return;
+		var newInput = [];
+		var brushArea = d3.event.selection;
+		if(brushArea === null) brushArea = xScale.range();
+
+
+		xScale2.domain().forEach(function(d){
+			var pos = xScale2(d) + xScale2.bandwidth()/2;
+			if (pos >= brushArea[0] && pos <= brushArea[1]){
+			  newInput.push(d);
+			}
+		});
+
+		var increment = 0;
+		var left=xScale2(d3.min(newInput));
+		var right = xScale2(d3.max(newInput))+xScale2.bandwidth();
+
+		d3.select(this).transition().call(d3.event.target.move,[left,right]);
+	}
+
+
+</script>
+
+
+</body>
+</html>

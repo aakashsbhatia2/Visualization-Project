@@ -2,7 +2,11 @@ from flask import Flask, render_template, request, redirect, Response, jsonify
 import pandas as pd
 import json
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
+
 
 us_state_abbrev = {
     'Alabama': 'AL',
@@ -183,11 +187,6 @@ def get_states_statistics():
         return jsonify(data)
     return render_template("index.html")
 
-"""@app.route("/stratified-samples", methods = ['POST'])
-def get_elbow():
-    
-    return jsonify(2)"""
-
 def stratified_samples(df):
     x = df.loc[:, :'Weather_Condition_Encoded']
     kmeans = KMeans(n_clusters = 4).fit(x)
@@ -214,8 +213,37 @@ def stratified_samples(df):
     data = {'chart_data': chart_data}
     return data
 
+def get_pc_values():
+    df = pd.read_csv("data_final_sampled.csv")
+
+    states = df['State'].tolist()
+    columns = df.columns.tolist()
+    columns.append('PC1')
+    columns.append('PC2')
+    df_final = pd.DataFrame(columns=columns)
+
+    set_of_states = set()
+    for state in states:
+        set_of_states.add(state)
+
+    pca = PCA(n_components=2)
+    for state in set_of_states:
+        df_temp = df.loc[df['State'] == state]
+        list_temp = df_temp.values.tolist()
+        x = MinMaxScaler().fit_transform(df_temp.loc[:, :'Weather_Condition_Encoded'])
+        principalComponents = pca.fit_transform(x)
+        for i in range(len(principalComponents)):
+            list_temp[i].append(principalComponents[i][0])
+            list_temp[i].append(principalComponents[i][1])
+        df_temp2 = pd.DataFrame(list_temp, columns=columns)
+        df_final = df_final.append(df_temp2)
+
+    return df_final
+
 
 if __name__ == "__main__":
-    df = pd.read_csv("data_final_sampled.csv")
+
+    #df = pd.read_csv("data_final_sampled.csv")
+    df = get_pc_values()
     data = stratified_samples(df)
     app.run(debug=True)
