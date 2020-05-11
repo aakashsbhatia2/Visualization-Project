@@ -1,3 +1,5 @@
+import operator
+
 from flask import Flask, render_template, request, redirect, Response, jsonify
 import pandas as pd
 import json
@@ -6,7 +8,11 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
+from statistics import mode
+from collections import Counter
 
+df_strat_final = None
+set_of_states = set()
 
 us_state_abbrev = {
     'Alabama': 'AL',
@@ -179,8 +185,6 @@ def get_states_statistics():
         record['value'] = accidentsdata[state]
         statedata.append(record)
 
-    print(statedata)
-
     if request.method == 'POST':
         chart_data = json.dumps(statedata, indent=2)
         data = {'chart_data': chart_data}
@@ -188,6 +192,7 @@ def get_states_statistics():
     return render_template("index.html")
 
 def stratified_samples(df):
+    global df_strat_final
     x = df.loc[:, :'Weather_Condition_Encoded']
     kmeans = KMeans(n_clusters = 4).fit(x)
     kmeans.fit(x)
@@ -213,6 +218,89 @@ def stratified_samples(df):
     data = {'chart_data': chart_data}
     return data
 
+@app.route("/getoverviewdata", methods = ['GET', 'POST'])
+def getOverviewStats():
+    global overviewdf
+    if request.method == 'POST':
+        mapping = overviewdf.to_dict(orient="records")
+        chart_data = json.dumps(mapping, indent=2)
+        data = {'chart_data': chart_data}
+        return jsonify(data)
+    return render_template("index.html")
+
+
+def prepareOverviewStats():
+    global df_strat_final, set_of_states
+    columns = ['State', 'Num_Accidents', 'Severity', 'Temperature_F', 'Humidity_per', 'Pressure_in',
+               'Visibility_mi', 'Wind_Speed_mph', 'Precipitation_in']
+    df = pd.DataFrame(columns=columns)
+    list_temp = list(list())
+    for state in set_of_states:
+        df_comp = df_strat_final.loc[df_strat_final['State'] == state]
+        list_comp = df_comp.values.tolist()
+        l = len(list_comp)
+        severities = list()
+        for i in range(l):
+            severities.append(int(list_comp[i][0]))
+        if(len(severities) > 0):
+            severities = sorted(dict(Counter(severities)).items(), key=operator.itemgetter(1),reverse=True)
+            max_value = severities[0][1]
+            final_severity = severities[0][0]
+            for severity in severities:
+                if severity[1] == max_value and severity[0] > final_severity:
+                    final_severity = severity[0]
+            temperatures = list()
+            humidities = list()
+            pressures = list()
+            visibilities = list()
+            wind_speeds = list()
+            precipitations = list()
+            for i in range(l):
+                severity = int(list_comp[i][0])
+                if severity == final_severity:
+                    temperatures.append(list_comp[i][3])
+                    humidities.append(list_comp[i][4])
+                    pressures.append(list_comp[i][5])
+                    visibilities.append(list_comp[i][6])
+                    wind_speeds.append(list_comp[i][7])
+                    precipitations.append(list_comp[i][8])
+            final_temperature = sum(temperatures) / max_value
+            final_humidity = sum(humidities) / max_value
+            final_pressure = sum(pressures) / max_value
+            final_visibility = sum(visibilities) / max_value
+            final_windspeed = sum(wind_speeds) / max_value
+            final_precipitation = sum(precipitations) / max_value
+            temp_list = list()
+            temp_list.append(state)
+            temp_list.append(l)
+            temp_list.append(final_severity)
+            temp_list.append(final_temperature)
+            temp_list.append(final_humidity)
+            temp_list.append(final_pressure)
+            temp_list.append(final_visibility)
+            temp_list.append(final_windspeed)
+            temp_list.append(final_precipitation)
+            list_temp.append(temp_list)
+
+    df = pd.DataFrame(list_temp, columns=columns)
+    # df.append(df_temp)
+
+    columns.append('PC1')
+    columns.append('PC2')
+    df_final = pd.DataFrame(columns=columns)
+    pca = PCA(n_components=2)
+    for state in set_of_states:
+        list_temp = df.values.tolist()
+        x = MinMaxScaler().fit_transform(df.loc[:, 'Num_Accidents':'Precipitation_in'])
+        principalComponents = pca.fit_transform(x)
+        for i in range(len(principalComponents)):
+            list_temp[i].append(principalComponents[i][0])
+            list_temp[i].append(principalComponents[i][1])
+        df_temp2 = pd.DataFrame(list_temp, columns=columns)
+        df_final = df_final.append(df_temp2)
+
+    return df_final
+
 def get_pc_values():
     df = pd.read_csv("data_final_sampled.csv")
 
@@ -222,7 +310,6 @@ def get_pc_values():
     columns.append('PC2')
     df_final = pd.DataFrame(columns=columns)
 
-    set_of_states = set()
     for state in states:
         set_of_states.add(state)
 
@@ -246,4 +333,5 @@ if __name__ == "__main__":
     #df = pd.read_csv("data_final_sampled.csv")
     df = get_pc_values()
     data = stratified_samples(df)
+    overviewdf = prepareOverviewStats()
     app.run(debug=True)
