@@ -13,6 +13,8 @@ from collections import Counter
 
 df_strat_final = None
 set_of_states = set()
+mapdata = {}
+statedata = []
 
 us_state_abbrev = {
     'Alabama': 'AL',
@@ -138,38 +140,22 @@ def index():
     global data
     return render_template("index.html", data = data)
 
-@app.route("/getusmapdata", methods = ['GET', 'POST'])
-def get_map_data():
-    global df
+def prep_map_data():
+    global mapdata, df
 
     us_states = pd.read_json("templates/us-states.json")
 
     featurerecords = us_states[["features"]].to_dict(orient="records")
-    # print(featurerecords)
     maparr = []
 
     for state in featurerecords:
-        # record = {}
-        # record['feature'] = state
-        # mapdata.append(record)
         maparr.append(state['features'])
 
-    # print(record['feature']['features'])
-
-    mapdata = {}
     mapdata['features'] = maparr
 
-    print(mapdata['features'])
-    if request.method == 'POST':
-        chart_data = json.dumps(mapdata, indent=2)
-        data = {'chart_data': chart_data}
-        return jsonify(data)
-    return render_template("index.html")
-
-@app.route("/getstatesdata", methods = ['GET', 'POST'])
-def get_states_statistics():
+def prep_state_data():
     global df
-    csvdata = df.to_dict(orient = "records")
+    csvdata = df.to_dict(orient="records")
     accidentsdata = {}
     for row in csvdata:
         key = us_state_fullform[row['State']]
@@ -178,13 +164,23 @@ def get_states_statistics():
         else:
             accidentsdata[key] = 1
 
-    statedata = []
     for state in accidentsdata:
         record = {}
         record['state'] = state
         record['value'] = accidentsdata[state]
         statedata.append(record)
 
+@app.route("/getusmapdata", methods = ['GET', 'POST'])
+def get_map_data():
+    if request.method == 'POST':
+        chart_data = json.dumps(mapdata, indent=2)
+        data = {'chart_data': chart_data}
+        return jsonify(data)
+    return render_template("index.html")
+
+@app.route("/getstatesdata", methods = ['GET', 'POST'])
+def get_states_statistics():
+    global statedata
     if request.method == 'POST':
         chart_data = json.dumps(statedata, indent=2)
         data = {'chart_data': chart_data}
@@ -329,9 +325,9 @@ def get_pc_values():
 
 
 if __name__ == "__main__":
-
-    #df = pd.read_csv("data_final_sampled.csv")
     df = get_pc_values()
     data = stratified_samples(df)
     overviewdf = prepareOverviewStats()
+    prep_map_data()
+    prep_state_data()
     app.run(debug=True)

@@ -18,7 +18,6 @@ var data;
 function loadData(inputData) {
     data = inputData;
     usmap();
-    showStateBars("USA");
 }
 // var data = {{ data.chart_data | safe}};
 
@@ -83,6 +82,14 @@ var us_state_fullform = {
 
 var uri = "http://127.0.0.1:5000/";
 
+var tooltip = d3.select("body").append("div").attr("class", "toolTip")
+          				    .style("position", "absolute")
+        		            .style("z-index", "10")
+                            .style("visibility", "hidden")
+                            .style("background", "#E0F8F1")
+                            .style("border", "1px solid #6F257F")
+  		                    .style("padding", "14px");
+
 function usmap() {
 
     //Width and height of map
@@ -110,53 +117,81 @@ function usmap() {
     var url = uri + "getstatesdata";
 
     // Load in my states data!
-    $.post(url, function (data) {
-        data = JSON.parse(data.chart_data);
-        var dataArray = [];
-        for (var d = 0; d < data.length; d++) {
-            dataArray.push(parseFloat(data[d].value))
-        }
-        var minVal = d3.min(dataArray);
-        var maxVal = d3.max(dataArray);
-        var ramp = d3.scaleLinear().domain([minVal, maxVal]).range([lowColor, highColor]);
+    var promise = new Promise((resolve) => {
+        $.post(url, function (data) {
+            data = JSON.parse(data.chart_data);
+            var dataArray = [];
+            for (var d = 0; d < data.length; d++) {
+                dataArray.push(parseFloat(data[d].value))
+            }
+            var minVal = d3.min(dataArray);
+            var maxVal = d3.max(dataArray);
+            var ramp = d3.scaleLinear().domain([minVal, maxVal]).range([lowColor, highColor]);
 
-        url = uri + "getusmapdata";
-        // Load GeoJSON data and merge with states data
-        $.post(url, function (json) {
-            json = JSON.parse(json.chart_data);
-            // Loop through each state data value in the .csv file
-            for (var i = 0; i < data.length; i++) {
-                // Grab State Name
-                var dataState = data[i].state;
-                // Grab data value
-                var dataValue = data[i].value;
+            url = uri + "getusmapdata";
+            // Load GeoJSON data and merge with states data
+            $.post(url, function (json) {
+                json = JSON.parse(json.chart_data);
+                // Loop through each state data value in the .csv file
+                for (var i = 0; i < data.length; i++) {
+                    // Grab State Name
+                    var dataState = data[i].state;
+                    // Grab data value
+                    var dataValue = data[i].value;
 
-                // Find the corresponding state inside the GeoJSON
-                for (var j = 0; j < json.features.length; j++) {
-                    var jsonState = json.features[j].properties.name;
+                    // Find the corresponding state inside the GeoJSON
+                    for (var j = 0; j < json.features.length; j++) {
+                        var jsonState = json.features[j].properties.name;
 
-                    if (dataState === jsonState) {
+                        if (dataState === jsonState) {
 
-                        // Copy the data value into the JSON
-                        json.features[j].properties.value = dataValue;
+                            // Copy the data value into the JSON
+                            json.features[j].properties.value = dataValue;
 
-                        // Stop looking through the JSON
-                        break;
+                            // Stop looking through the JSON
+                            break;
+                        }
                     }
                 }
-            }
-            svg_usmap.selectAll("path")
-                .data(json.features)
-                .enter()
-                .append("path")
-                .attr("d", path)
-                .style("stroke", "#fff")
-                .style("stroke-width", "1")
-                .style("fill", function (d) { return ramp(d.properties.value) })
-                .on('click', function (d) {
-                    showStateBars(d.properties.name);
-                });
+                svg_usmap.selectAll("path")
+                    .data(json.features)
+                    .enter()
+                    .append("path")
+                    .attr("d", path)
+                    .style("stroke", "#fff")
+                    .style("stroke-width", "1")
+                    .style("fill", function (d) { return ramp(d.properties.value) })
+                    .on("mousemove", function(d) {
+                        console.log("Inside mousemove");
+                        var htm = d.properties.name + "<br>" + "Number of accidents: " + d.properties.value;
+                        tooltip
+                        .style("left", d3.event.pageX - 50 + "px")
+                        .style("top", d3.event.pageY - 70 + "px")
+                        .style("display", "inline-block")
+                        .style("visibility", "visible")
+                        .html(htm);
+                    })
+                    .on("mouseover", function(d,i) {
+                        d3.select(this)
+                        .style("stroke", "#E74C3C")
+                        .style("stroke-width", "5")
+                        .style("fill", "#E74C3C");
+                    })
+                    .on("mouseout", function(d, i) {
+                        d3.select(this)
+                        .style("stroke", "#fff")
+                        .style("stroke-width", "1")
+                        .style("fill", ramp(d.properties.value));
+                        tooltip.style("display", "none")
+                    })
+                    .on('click', function (d) {
+                        showStateBars(d.properties.name);
+                    });
+                    resolve();
+            });
         });
+    }).then(function() {
+        showStateBars("USA");
     });
 }
 
@@ -260,6 +295,14 @@ function parallelcood(statedata) {
         .style("stroke", function (d) { return colorpicker(d.Severity); })
         .style("opacity", 0.5)
         .on("mouseover", function (d) {
+            var htm = "Severity: " + d.Severity;
+            tooltip
+            .style("left", d3.event.pageX - 50 + "px")
+            .style("top", d3.event.pageY - 20 + "px")
+            .style("display", "inline-block")
+            .style("visibility", "visible")
+            .html(htm);
+
             d3.selectAll(".line")
                 .style("stroke", function (dl) {
                     if (dl.Severity == d.Severity) {
@@ -272,6 +315,7 @@ function parallelcood(statedata) {
             d3.selectAll(".line")
                 .style("stroke", function (d) { return colorpicker(d.Severity); })
                 .style("opacity", 0.5);
+            tooltip.style("display", "none")
         });
 
     svg_pc.selectAll("myAxis")
@@ -365,7 +409,37 @@ function scrollablebarchart(city_count) {
         .attr("height", function (d) {
             return height - yScale(d.value);
         })
-        .attr("fill", function (d) { return "steelblue"; });
+        .attr("fill", function (d) { return "steelblue"; })
+        .on("mousemove", function(d) {
+            console.log("Inside mousemove");
+            var htm = d.key + "<br>" + "Number of accidents: " + d.value;
+            tooltip
+            .style("left", d3.event.pageX - 50 + "px")
+            .style("top", d3.event.pageY + 10 + "px")
+            .style("display", "inline-block")
+            .style("visibility", "visible")
+            .html(htm);
+        })
+        .on("mouseover", function(d,i) {
+            d3.select(this)
+            .attr("y", 0)
+            .attr("height", height)
+            .style("fill", "steelblue")
+            .style("opacity", 0.5);
+        })
+        .on("mouseout", function(d, i) {
+            d3.select(this)
+            .attr("y", function(d) {
+                return yScale(d.value);
+            })
+            .attr("height", function (d) {
+                return height - yScale(d.value);
+            })
+            .style("fill", function (d) { return "steelblue"; })
+            .style("opacity", 1);
+            tooltip.style("display", "none");
+
+        });
 
     var bars2 = context.selectAll("rect")
         .data(city_count)
@@ -456,7 +530,7 @@ function screenplots(statedata, city_count) {
     scrollablebarchart(city_count);
     scatterplot(statedata);
     parallelcood(statedata);
-}
+}   
 
 var graphdiv = d3.select("#usmap")
     .append("div")
