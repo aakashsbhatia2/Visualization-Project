@@ -1,111 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-<style type="text/css">
-    /* Legend Font Style */
-
-    svg {
-      font: 10px sans-serif;
-    }
-
-    .background path {
-      fill: none;
-      stroke: #ddd;
-      shape-rendering: crispEdges;
-    }
-
-    .foreground path {
-      fill: none;
-      stroke: steelblue;
-    }
-
-    .brush .extent {
-      fill-opacity: .3;
-      stroke: #fff;
-      shape-rendering: crispEdges;
-    }
-
-    .axis line,
-    .axis path {
-      fill: none;
-      stroke: #000;
-      shape-rendering: crispEdges;
-    }
-
-    .axis text {
-      text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-      cursor: move;
-    }
-
-
-    body {
-        font: 11px sans-serif;
-        background-color: #ffffff;
-    }
-
-    /* Legend Position Style */
-    .legend {
-        position:absolute;
-        left:20px;
-        top:30px;
-    }
-
-    .axis text {
-        font: 10px sans-serif;
-    }
-
-    .axis line, .axis path {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-    }
-
-    #wrapper {
-    width: 540px;
-    height:770px;
-    }
-    #wrapper2 {
-    width: 750px;
-    height:770px;
-    }
-
-    #usmap {
-        display: inline-block;
-        #width: 100%;
-        #height: 40%;
-        margin-top: 1%;
-        #background: red;
-    }
-
-    #parallelcood {
-        display: inline-block;
-        #width: 100%;
-        #height: 78.5%;
-        #background: green;
-        margin-top: 1%;
-    }
-    #barchart {
-        display: inline-block;
-        #width: 100%;
-        #height: 18%;
-        #background: green;
-        margin-top: 1%;
-    }
-    #scatterplot {
-        display: inline-block;
-        #width: 100%;
-        #height: 57%;
-        #background: blue;
-        margin-top: 1%;
-    }
-
-</style>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheet.css') }}">
 <head>
     <title>Final Project</title>
 </head>
+<div class="nav-bar">
+    <div>US Accidents Dashboard</div>
+</div>
     <div id="usmap"></div>
     <div id="parallelcood"></div>
     <div id="scatterplot"></div>
-    <div id="barchart"></div>
+    <div id="barchart">
+        <input type="checkbox" id="logdisplay" name="logdisplay" value="logdisplay">
+        <label id="loglabel" for="logdisplay">Display log view</label>
+    </div>
 <body>
 </body>
 <script src="https://d3js.org/d3.v4.min.js"></script>

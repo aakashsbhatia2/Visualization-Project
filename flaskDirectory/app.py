@@ -149,6 +149,8 @@ def prep_map_data():
     maparr = []
 
     for state in featurerecords:
+        if state['features']['properties']['name'] == 'Alaska':
+            print(state['features'])
         maparr.append(state['features'])
 
     mapdata['features'] = maparr
@@ -229,7 +231,6 @@ def prepareOverviewStats():
     global df_strat_final, set_of_states
     columns = ['State', 'Num_Accidents', 'Severity', 'Temperature_F', 'Humidity_per', 'Pressure_in',
                'Visibility_mi', 'Wind_Speed_mph', 'Precipitation_in']
-    df = pd.DataFrame(columns=columns)
     list_temp = list(list())
     for state in set_of_states:
         df_comp = df_strat_final.loc[df_strat_final['State'] == state]
@@ -279,7 +280,6 @@ def prepareOverviewStats():
             list_temp.append(temp_list)
 
     df = pd.DataFrame(list_temp, columns=columns)
-    # df.append(df_temp)
 
     columns.append('PC1')
     columns.append('PC2')

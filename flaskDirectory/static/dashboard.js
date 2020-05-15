@@ -14,6 +14,9 @@ function colorpicker(v) {
 }
 
 var data;
+var logdisplay = d3.select("#logdisplay");
+document.getElementById("logdisplay").style.display = "none";
+document.getElementById("loglabel").style.display = "none";
 
 function loadData(inputData) {
     data = inputData;
@@ -88,16 +91,17 @@ var tooltip = d3.select("body").append("div").attr("class", "toolTip")
                             .style("visibility", "hidden")
                             .style("background", "#E0F8F1")
                             .style("border", "1px solid #6F257F")
-  		                    .style("padding", "14px");
+                            .style("border-radius", "5px")
+  		                    .style("padding", "5px");
 
 function usmap() {
 
     //Width and height of map
-    var width = 540;
-    var height = 300;
+    var width = 600;
+    var height = 250;
 
-    var lowColor = '#7FB3D5';
-    var highColor = '#2471A3';
+    var lowColor = '#F6DDCC';
+    var highColor = '#BA4A00';
 
     var projection = d3.geoAlbersUsa()
         .translate([width / 2, height / 2]) // translate to center of screen
@@ -124,8 +128,8 @@ function usmap() {
             for (var d = 0; d < data.length; d++) {
                 dataArray.push(parseFloat(data[d].value))
             }
-            var minVal = d3.min(dataArray);
-            var maxVal = d3.max(dataArray);
+            var minVal = Math.log(d3.min(dataArray));
+            var maxVal = Math.log(d3.max(dataArray));
             var ramp = d3.scaleLinear().domain([minVal, maxVal]).range([lowColor, highColor]);
 
             url = uri + "getusmapdata";
@@ -160,9 +164,8 @@ function usmap() {
                     .attr("d", path)
                     .style("stroke", "#fff")
                     .style("stroke-width", "1")
-                    .style("fill", function (d) { return ramp(d.properties.value) })
+                    .style("fill", function (d) { return ramp(Math.log(d.properties.value)); })
                     .on("mousemove", function(d) {
-                        console.log("Inside mousemove");
                         var htm = d.properties.name + "<br>" + "Number of accidents: " + d.properties.value;
                         tooltip
                         .style("left", d3.event.pageX - 50 + "px")
@@ -173,19 +176,20 @@ function usmap() {
                     })
                     .on("mouseover", function(d,i) {
                         d3.select(this)
-                        .style("stroke", "#E74C3C")
+                        .style("stroke", "#BFC9CA")
                         .style("stroke-width", "5")
-                        .style("fill", "#E74C3C");
+                        .style("fill", "#BFC9CA");
                     })
                     .on("mouseout", function(d, i) {
                         d3.select(this)
                         .style("stroke", "#fff")
                         .style("stroke-width", "1")
-                        .style("fill", ramp(d.properties.value));
+                        .style("fill", ramp(Math.log(d.properties.value)));
                         tooltip.style("display", "none")
                     })
                     .on('click', function (d) {
                         showStateBars(d.properties.name);
+                        document.getElementById("logdisplay").checked = false;
                     });
                     resolve();
             });
@@ -197,8 +201,8 @@ function usmap() {
 
 function scatterplot(statedata) {
     var margin_sp = { top_sp: 30, right_sp: 50, bottom_sp: 40, left_sp: 40 };
-    var width_sp = 560 - margin_sp.left_sp - margin_sp.right_sp;
-    var height_sp = 450 - margin_sp.top_sp - margin_sp.bottom_sp;
+    var width_sp = 600 - margin_sp.left_sp - margin_sp.right_sp;
+    var height_sp = 400 - margin_sp.top_sp - margin_sp.bottom_sp;
 
     var svg_sp = d3.select('#scatterplot')
         .append('svg')
@@ -255,8 +259,8 @@ function scatterplot(statedata) {
 function parallelcood(statedata) {
     // Parallel co-od
     var margin_pc = { top_pc: 30, right_pc: 10, bottom_pc: 10, left_pc: 10 },
-        width_pc = 760 - margin_pc.left_pc - margin_pc.right_pc,
-        height_pc = 300 - margin_pc.top_pc - margin_pc.bottom_pc;
+        width_pc = 700 - margin_pc.left_pc - margin_pc.right_pc,
+        height_pc = 250 - margin_pc.top_pc - margin_pc.bottom_pc;
 
     var svg_pc = d3.select("#parallelcood")
         .append("svg")
@@ -336,7 +340,7 @@ function scrollablebarchart(city_count) {
     var margin = { top: 20, right: 20, bottom: 90, left: 50 },
         margin2 = { top: 290, right: 20, bottom: 30, left: 50 },
         width = 600 - margin.left - margin.right,
-        height = 300 - margin.top - margin.bottom,
+        height = 270 - margin.top - margin.bottom,
         height2 = 360 - margin2.top - margin2.bottom;
 
     var svg_bc = d3.select("#barchart").append("svg")
@@ -411,7 +415,6 @@ function scrollablebarchart(city_count) {
         })
         .attr("fill", function (d) { return "steelblue"; })
         .on("mousemove", function(d) {
-            console.log("Inside mousemove");
             var htm = d.key + "<br>" + "Number of accidents: " + d.value;
             tooltip
             .style("left", d3.event.pageX - 50 + "px")
@@ -524,6 +527,8 @@ function scrollablebarchart(city_count) {
 
         d3.select(this).transition().call(d3.event.target.move, [left, right]);
     }
+    document.getElementById("logdisplay").style.display = "inline";
+    document.getElementById("loglabel").style.display = "inline";
 }
 
 function screenplots(statedata, city_count) {
@@ -547,7 +552,6 @@ function showStateBars(state) {
         city_count,
         chartdata;
 
-    console.log("state: " + state);
     if (state == "USA") {
         url = uri + "getoverviewdata";
         city_count = [];
@@ -564,7 +568,6 @@ function showStateBars(state) {
         });
     }
     else {
-        console.log(data[0]);
         for (var i = 0; i < data.length; i++) {
             var datastate = us_state_fullform[data[i].State];
             if (datastate === state) {
@@ -591,4 +594,19 @@ function showStateBars(state) {
         }
         screenplots(statedata, city_count);
     }
+
+    logdisplay.on("click", function(d) {
+        if(this.checked) {
+            var logcity_count = JSON.parse(JSON.stringify(city_count));
+            for(var i = 0; i < Object.keys(logcity_count).length; i++) {
+                logcity_count[i].value = Math.log(logcity_count[i].value);
+            }
+            d3.select("#barchart").select("svg").remove();
+            scrollablebarchart(logcity_count);
+        }
+        else {
+            d3.select("#barchart").select("svg").remove();
+            scrollablebarchart(city_count);
+        }
+    });
 }

@@ -1,0 +1,117 @@
+@charset "UTF-8";
+
+  svg {
+    font: 10px sans-serif;
+  }
+
+  .nav-bar {
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
+    height: 50px;
+    text-align: center;
+  }
+
+  .reset {
+    float: left;
+  }
+
+  .nav-bar > div {
+    font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+    font-weight: 600;
+    font-size: 18px;
+    padding-top: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .background path {
+    fill: none;
+    stroke: #ddd;
+    shape-rendering: crispEdges;
+  }
+
+  .foreground path {
+    fill: none;
+    stroke: steelblue;
+  }
+
+  .brush .extent {
+    fill-opacity: .3;
+    stroke: #fff;
+    shape-rendering: crispEdges;
+  }
+
+  .axis line,
+  .axis path {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .axis text {
+    text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+    cursor: move;
+  }
+
+
+  body {
+      font: 11px sans-serif;
+      background-color: #ffffff;
+  }
+
+  /* Legend Position Style */
+  .legend {
+      position:absolute;
+      left:20px;
+      top:30px;
+  }
+
+  .axis text {
+      font: 10px sans-serif;
+  }
+
+  .axis line, .axis path {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+  }
+
+  #wrapper {
+  width: 540px;
+  height:770px;
+  }
+  #wrapper2 {
+  width: 750px;
+  height:770px;
+  }
+
+  #usmap {
+      display: inline-block;
+      width: 40%;
+      margin-top: 1%;
+      bottom: 60%;
+      /* background: red; */
+  }
+
+  #parallelcood {
+      display: inline-block;
+      width: 40%;
+      /* background: green; */
+      margin-top: 1%;
+      margin-left: 5%;
+      bottom: 60%;
+  }
+
+  #barchart {
+      display: inline-block;
+      width: 40%;
+      /* background: green; */
+      margin-top: 2%;
+      margin-left: 5%;
+      top: 50%;
+  }
+  #scatterplot {
+      display: inline-block;
+      width: 43%;
+      top: 50%;
+      /* background: blue; */
+      margin: 2% 1% 0 1%;
+  }
