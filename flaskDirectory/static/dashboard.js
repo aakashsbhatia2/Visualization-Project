@@ -14,6 +14,7 @@ function colorpicker(v) {
 }
 
 var data;
+var navbar = document.getElementById("dashboard_title");
 var logdisplay = d3.select("#logdisplay");
 document.getElementById("logdisplay").style.display = "none";
 document.getElementById("loglabel").style.display = "none";
@@ -110,6 +111,7 @@ var tooltip = d3.select("body").append("div").attr("class", "toolTip")
 function reset() {
     document.getElementById("logdisplay").style.display = "none";
     document.getElementById("loglabel").style.display = "none";
+    navbar.innerHTML = "US Accidents Statistics";
     showStateBars("USA");
 }
 
@@ -207,7 +209,6 @@ function usmap() {
                         tooltip.style("display", "none")
                     })
                     .on('click', function (d) {
-                        var navbar = document.getElementById("dashboard_title");
                         navbar.innerHTML = d.properties.name + " State Accidents Statistics";
                         showStateBars(d.properties.name);
                     });
