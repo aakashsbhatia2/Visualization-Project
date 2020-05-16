@@ -1,15 +1,15 @@
 function colorpicker(v) {
     if (v === 1) {
-        return "red";
+        return "green";
     }
     if (v === 2) {
-        return "orange";
+        return "dodgerblue";
     }
     if (v === 3) {
-        return "blue";
+        return "orange";
     }
     if (v === 4) {
-        return "green";
+        return "firebrick";
     }
 }
 
@@ -21,6 +21,19 @@ document.getElementById("loglabel").style.display = "none";
 function loadData(inputData) {
     data = inputData;
     usmap();
+    var button = document.createElement("button");
+
+    button.setAttribute("id", "reset");
+    button.setAttribute("class", "reset");
+
+    button.innerHTML = '<i class = "fa fa-refresh"></i> Reset to State View';
+
+    var usmapelem = document.getElementById("usmap");
+    usmapelem.appendChild(button);
+
+    button.onclick = reset;
+
+    document.getElementById("reset").style.display = "none";
 }
 // var data = {{ data.chart_data | safe}};
 
@@ -92,19 +105,25 @@ var tooltip = d3.select("body").append("div").attr("class", "toolTip")
                             .style("background", "#E0F8F1")
                             .style("border", "1px solid #6F257F")
                             .style("border-radius", "5px")
-  		                    .style("padding", "5px");
+                              .style("padding", "5px");
+                              
+function reset() {
+    document.getElementById("logdisplay").style.display = "none";
+    document.getElementById("loglabel").style.display = "none";
+    showStateBars("USA");
+}
 
 function usmap() {
 
     //Width and height of map
     var width = 600;
-    var height = 250;
+    var height = 260;
 
     var lowColor = '#F6DDCC';
     var highColor = '#BA4A00';
 
     var projection = d3.geoAlbersUsa()
-        .translate([width / 2, height / 2]) // translate to center of screen
+        .translate([width / 2, height / 2 - 10]) // translate to center of screen
         .scale([600]); // scale things down so see entire US
 
     // Define path generator
@@ -188,14 +207,15 @@ function usmap() {
                         tooltip.style("display", "none")
                     })
                     .on('click', function (d) {
+                        var navbar = document.getElementById("dashboard_title");
+                        navbar.innerHTML = d.properties.name + " State Accidents Statistics";
                         showStateBars(d.properties.name);
-                        document.getElementById("logdisplay").checked = false;
                     });
                     resolve();
             });
         });
     }).then(function() {
-        showStateBars("USA");
+        reset();
     });
 }
 
@@ -209,7 +229,7 @@ function scatterplot(statedata) {
         .attr('width', width_sp + margin_sp.left_sp + margin_sp.right_sp)
         .attr('height', height_sp + margin_sp.top_sp + margin_sp.bottom_sp)
         .append('g')
-        .attr('transform', 'translate(' + margin_sp.left_sp + ',' + margin_sp.top_sp + ')');
+        .attr('transform', 'translate(' + (margin_sp.left_sp + 10) + ',' + (margin_sp.top_sp - 10) + ')');
 
     var xScale_sp = d3.scaleLinear()
         .range([0, width_sp]);
@@ -258,7 +278,7 @@ function scatterplot(statedata) {
 
 function parallelcood(statedata) {
     // Parallel co-od
-    var margin_pc = { top_pc: 30, right_pc: 10, bottom_pc: 10, left_pc: 10 },
+    var margin_pc = { top_pc: 18, right_pc: 10, bottom_pc: 10, left_pc: 10 },
         width_pc = 700 - margin_pc.left_pc - margin_pc.right_pc,
         height_pc = 250 - margin_pc.top_pc - margin_pc.bottom_pc;
 
@@ -299,13 +319,6 @@ function parallelcood(statedata) {
         .style("stroke", function (d) { return colorpicker(d.Severity); })
         .style("opacity", 0.5)
         .on("mouseover", function (d) {
-            var htm = "Severity: " + d.Severity;
-            tooltip
-            .style("left", d3.event.pageX - 50 + "px")
-            .style("top", d3.event.pageY - 20 + "px")
-            .style("display", "inline-block")
-            .style("visibility", "visible")
-            .html(htm);
 
             d3.selectAll(".line")
                 .style("stroke", function (dl) {
@@ -319,7 +332,6 @@ function parallelcood(statedata) {
             d3.selectAll(".line")
                 .style("stroke", function (d) { return colorpicker(d.Severity); })
                 .style("opacity", 0.5);
-            tooltip.style("display", "none")
         });
 
     svg_pc.selectAll("myAxis")
@@ -337,7 +349,7 @@ function parallelcood(statedata) {
 }
 
 function scrollablebarchart(city_count) {
-    var margin = { top: 20, right: 20, bottom: 90, left: 50 },
+    var margin = { top: 10, right: 20, bottom: 90, left: 50 },
         margin2 = { top: 290, right: 20, bottom: 30, left: 50 },
         width = 600 - margin.left - margin.right,
         height = 270 - margin.top - margin.bottom,
@@ -345,7 +357,7 @@ function scrollablebarchart(city_count) {
 
     var svg_bc = d3.select("#barchart").append("svg")
         .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom + 120);
+        .attr("height", height + margin.top + margin.bottom + 160);
 
     var focus = svg_bc.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -548,11 +560,13 @@ function showStateBars(state) {
     d3.select("#scatterplot").select("svg").remove();
     d3.select("#parallelcood").select("svg").remove();
     document.getElementById("graphdiv").innerHTML = "";
+    document.getElementById("logdisplay").checked = false;
     var statedata = [],
         city_count,
         chartdata;
 
     if (state == "USA") {
+        document.getElementById("reset").style.display = "none";
         url = uri + "getoverviewdata";
         city_count = [];
         $.post(url, function (overviewdata) {
@@ -593,6 +607,7 @@ function showStateBars(state) {
             city_count.splice(35, citycountlen - 1);
         }
         screenplots(statedata, city_count);
+        document.getElementById("reset").style.display = "inline";
     }
 
     logdisplay.on("click", function(d) {

@@ -8,10 +8,29 @@
     box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
     height: 50px;
     text-align: center;
+    background-color: lightslategray;
+    /* border-radius: 40px; */
+    width: 100%;
   }
 
   .reset {
-    float: left;
+    margin-left: 35%;
+    margin-top: 2%;
+    /* font-family: Georgia, Cambria, "Times New Roman", Times, serif; */
+    background-color: chocolate;
+    border: none;
+    border-radius: 25px;
+    color: white;
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    transition: all 0.05s cubic-bezier(.25,.8,.25,1);
+  }
+
+  .reset:hover {
+    background-color: darksalmon;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
   }
 
   .nav-bar > div {
@@ -20,6 +39,7 @@
     font-size: 18px;
     padding-top: 12px;
     letter-spacing: 0.02em;
+    color: snow;
   }
 
   .background path {
@@ -55,6 +75,7 @@
   body {
       font: 11px sans-serif;
       background-color: #ffffff;
+      margin: 0;
   }
 
   /* Legend Position Style */
