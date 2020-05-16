@@ -1,15 +1,19 @@
+var rating_accident = ['Severity 1', 'Severity 2', 'Severity 3', 'Severity 4'];
+
+var colors_accidents = ['orange', '#ADFF2F', '#43c0ac', 'white'];
+
 function colorpicker(v) {
     if (v === 1) {
-        return "green";
-    }
-    if (v === 2) {
-        return "dodgerblue";
-    }
-    if (v === 3) {
         return "orange";
     }
+    if (v === 2) {
+        return "#ADFF2F";
+    }
+    if (v === 3) {
+        return "#43c0ac";
+    }
     if (v === 4) {
-        return "firebrick";
+        return "white";
     }
 }
 
@@ -119,14 +123,14 @@ function usmap() {
 
     //Width and height of map
     var width = 600;
-    var height = 260;
+    var height = 305;
 
     var lowColor = '#F6DDCC';
     var highColor = '#BA4A00';
 
     var projection = d3.geoAlbersUsa()
-        .translate([width / 2, height / 2 - 10]) // translate to center of screen
-        .scale([600]); // scale things down so see entire US
+        .translate([width / 2, height / 2 ]) // translate to center of screen
+        .scale([650]); // scale things down so see entire US
 
     // Define path generator
     var path = d3.geoPath() // path generator that will convert GeoJSON to SVG paths
@@ -221,9 +225,9 @@ function usmap() {
 }
 
 function scatterplot(statedata) {
-    var margin_sp = { top_sp: 30, right_sp: 50, bottom_sp: 40, left_sp: 40 };
+    var margin_sp = { top_sp: 20, right_sp: 50, bottom_sp: 40, left_sp: 40 };
     var width_sp = 600 - margin_sp.left_sp - margin_sp.right_sp;
-    var height_sp = 400 - margin_sp.top_sp - margin_sp.bottom_sp;
+    var height_sp = 350 - margin_sp.top_sp - margin_sp.bottom_sp;
 
     var svg_sp = d3.select('#scatterplot')
         .append('svg')
@@ -273,15 +277,54 @@ function scatterplot(statedata) {
         .enter().append('circle')
         .attr('cx', function (d) { return xScale_sp(d.PC1); })
         .attr('cy', function (d) { return yScale_sp(d.PC2); })
-        .attr('r', 3)
+        .attr('r', 2.5)
         .style('fill', function (d) { return colorpicker(d.Severity); });
+
+    svg_sp.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin_sp.left_sp -10)
+                .attr("x",0 - (height_sp / 2))
+                .attr("dy", "1em")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "13px")
+                .text("PC2");
+
+    svg_sp.append("text")
+                .attr("transform", "translate(" + (width_sp/2) + " ," + (height_sp + margin_sp.top_sp + 15) + ")")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "13px")
+                .text("PC1");
+
+        //adding legend
+        var legend = svg_sp.selectAll(".legend")
+            .data(colors_accidents)
+            .enter()
+            .append("g")
+            .attr("class", "legend")
+            .attr("transform", function(d, i) { return "translate(0," + i*20 + ")"; });
+
+        legend.append("rect")
+            .data(colors_accidents)
+            .attr("x", width_sp)
+            .attr("y", 9)
+            .attr("width", 18)
+            .attr("height", 18)
+            .style("fill", function(d) { return d; });
+
+        legend.append("text")
+            .data(rating_accident)
+            .attr("x", width_sp -10)
+            .attr("y", 18)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(function(d) { return d; });
 }
 
 function parallelcood(statedata) {
     // Parallel co-od
     var margin_pc = { top_pc: 18, right_pc: 10, bottom_pc: 10, left_pc: 10 },
         width_pc = 700 - margin_pc.left_pc - margin_pc.right_pc,
-        height_pc = 250 - margin_pc.top_pc - margin_pc.bottom_pc;
+        height_pc = 300 - margin_pc.top_pc - margin_pc.bottom_pc;
 
     var svg_pc = d3.select("#parallelcood")
         .append("svg")
@@ -318,12 +361,12 @@ function parallelcood(statedata) {
         .attr("d", path)
         .style("fill", "none")
         .style("stroke", function (d) { return colorpicker(d.Severity); })
-        .style("opacity", 0.5)
+        .style("opacity", 3)
         .on("mouseover", function (d) {
 
             d3.selectAll(".line")
                 .style("stroke", function (dl) {
-                    if (dl.Severity == d.Severity) {
+                    if (dl.Severity === d.Severity) {
                         return colorpicker(dl.Severity);
                     }
                 })
@@ -332,7 +375,7 @@ function parallelcood(statedata) {
         .on("mouseout", function () {
             d3.selectAll(".line")
                 .style("stroke", function (d) { return colorpicker(d.Severity); })
-                .style("opacity", 0.5);
+                .style("opacity", 1);
         });
 
     svg_pc.selectAll("myAxis")
@@ -346,19 +389,46 @@ function parallelcood(statedata) {
         .style("text-anchor", "middle")
         .attr("y", -9)
         .text(function (d) { return d; })
-        .style("fill", "black");
+        .style("fill", "black")
+        .style('font-size', 11 )
+        .style('text-align', 'left');
+
+
+    //adding legend
+        var legend = svg_pc.selectAll(".legend")
+            .data(colors_accidents)
+            .enter()
+            .append("g")
+            .attr("class", "legend")
+            .attr("transform", function(d, i) { return "translate(0," + i*20 + ")"; });
+
+        legend.append("rect")
+            .data(colors_accidents)
+            .attr("x", width_pc -10)
+            .attr("y", 9)
+            .attr("width", 18)
+            .attr("height", 18)
+            .style("fill", function(d) { return d; });
+
+        legend.append("text")
+            .data(rating_accident)
+            .attr("x", width_pc -16)
+            .attr("y", 18)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(function(d) { return d; });
 }
 
 function scrollablebarchart(city_count) {
-    var margin = { top: 10, right: 20, bottom: 90, left: 50 },
-        margin2 = { top: 290, right: 20, bottom: 30, left: 50 },
+    var margin = { top: 30, right: 20, bottom: 50, left: 50 },
+        margin2 = { top: 300, right: 20, bottom: 0, left: 50 },
         width = 600 - margin.left - margin.right,
-        height = 270 - margin.top - margin.bottom,
-        height2 = 360 - margin2.top - margin2.bottom;
+        height = 220 - margin.top - margin.bottom,
+        height2 = 350 - margin2.top - margin2.bottom;
 
     var svg_bc = d3.select("#barchart").append("svg")
         .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom + 160);
+        .attr("height", height + margin.top + margin.bottom + 150);
 
     var focus = svg_bc.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -410,7 +480,23 @@ function scrollablebarchart(city_count) {
         .style("text-anchor", "end")
         .attr("dx", "-.8em")
         .attr("dy", ".15em")
-        .attr("transform", "rotate(-65)");
+        .attr("transform", "rotate(-65)")
+        .attr("fill", "none");
+
+    svg_bc.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left + 50)
+                .attr("x",0 - (height / 2) -30)
+                .attr("dy", "1em")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "13px")
+                .text("Count");
+
+    svg_bc.append("text")
+                .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top+95) + ")")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "13px")
+                .text("Area");
 
     var bars1 = focus.selectAll("rect")
         .data(city_count)
@@ -426,7 +512,7 @@ function scrollablebarchart(city_count) {
         .attr("height", function (d) {
             return height - yScale(d.value);
         })
-        .attr("fill", function (d) { return "steelblue"; })
+        .attr("fill", function (d) { return "#FFFF66"; })
         .on("mousemove", function(d) {
             var htm = d.key + "<br>" + "Number of accidents: " + d.value;
             tooltip
@@ -436,12 +522,10 @@ function scrollablebarchart(city_count) {
             .style("visibility", "visible")
             .html(htm);
         })
-        .on("mouseover", function(d,i) {
+        .on("mouseover", function() {
             d3.select(this)
-            .attr("y", 0)
-            .attr("height", height)
-            .style("fill", "steelblue")
-            .style("opacity", 0.5);
+            .style("fill", "#7CFC00")
+            .style("opacity", 1);
         })
         .on("mouseout", function(d, i) {
             d3.select(this)
@@ -451,7 +535,7 @@ function scrollablebarchart(city_count) {
             .attr("height", function (d) {
                 return height - yScale(d.value);
             })
-            .style("fill", function (d) { return "steelblue"; })
+            .style("fill", function (d) { return "#FFFF66"; })
             .style("opacity", 1);
             tooltip.style("display", "none");
 
@@ -467,7 +551,7 @@ function scrollablebarchart(city_count) {
         .attr("y", function (d) { return yScale2(d.value); })
         .attr("width", xScale2.bandwidth())
         .attr("height", function (d) { return height2 - yScale2(d.value); })
-        .attr("fill", function (d) { return "steelblue"; });
+        .attr("fill", function (d) { return "#FFFF66"; });
 
     var brush = d3.brushX()
         .extent([[0, 0], [width, height2]])

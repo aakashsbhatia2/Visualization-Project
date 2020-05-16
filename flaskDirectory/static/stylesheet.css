@@ -1,39 +1,55 @@
 @charset "UTF-8";
 
-  svg {
-    font: 10px sans-serif;
+    input{
+        margin-left: 55%;
+    }
+    svg {
+        font: 10px sans-serif;
+    }
+
+    html{
+    background-color: #808888;
+}
+
+  body {
+      font: 11px sans-serif;
+
   }
 
-  .nav-bar {
-    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
-    height: 50px;
-    text-align: center;
-    background-color: lightslategray;
-    /* border-radius: 40px; */
-    width: 100%;
-  }
+  .legend rect {
+  fill:white;
+  stroke:black;
+  opacity:0.8;}
 
-  .reset {
-    margin-left: 35%;
-    margin-top: 2%;
-    /* font-family: Georgia, Cambria, "Times New Roman", Times, serif; */
-    background-color: chocolate;
-    border: none;
-    border-radius: 25px;
-    color: white;
-    padding: 8px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-    transition: all 0.05s cubic-bezier(.25,.8,.25,1);
-  }
+    .nav-bar {
+        box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
+        height: 40px;
+        text-align: center;
+        background-color: maroon;
+        /* border-radius: 40px; */
+        width: 100%;
+    }
+
+    .reset {
+        margin-left: 35%;
+        margin-top: 2%;
+        /* font-family: Georgia, Cambria, "Times New Roman", Times, serif; */
+        background-color: chocolate;
+        border: none;
+        border-radius: 25px;
+        color: white;
+        font-size: 12px;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        transition: all 0.05s cubic-bezier(.25,.8,.25,1);
+    }
 
   .reset:hover {
     background-color: darksalmon;
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
   }
 
-  .nav-bar > div {
+  .nav-bar div {
     font-family: Georgia, Cambria, "Times New Roman", Times, serif;
     font-weight: 600;
     font-size: 18px;
@@ -59,24 +75,7 @@
     shape-rendering: crispEdges;
   }
 
-  .axis line,
-  .axis path {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-  }
 
-  .axis text {
-    text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-    cursor: move;
-  }
-
-
-  body {
-      font: 11px sans-serif;
-      background-color: #ffffff;
-      margin: 0;
-  }
 
   /* Legend Position Style */
   .legend {
@@ -85,54 +84,36 @@
       top:30px;
   }
 
-  .axis text {
-      font: 10px sans-serif;
-  }
 
-  .axis line, .axis path {
-      fill: none;
-      stroke: #000;
-      shape-rendering: crispEdges;
-  }
-
-  #wrapper {
-  width: 540px;
-  height:770px;
-  }
-  #wrapper2 {
-  width: 750px;
-  height:770px;
-  }
 
   #usmap {
       display: inline-block;
       width: 40%;
-      margin-top: 1%;
-      bottom: 60%;
-      /* background: red; */
+      bottom: 50%;
+      margin-left: 5%;
+      #background: red;
   }
 
   #parallelcood {
       display: inline-block;
       width: 40%;
-      /* background: green; */
+      #background: green;
       margin-top: 1%;
-      margin-left: 5%;
       bottom: 60%;
+      margin-left: 5%;
   }
 
   #barchart {
       display: inline-block;
       width: 40%;
-      /* background: green; */
-      margin-top: 2%;
-      margin-left: 5%;
+      #background: blue;
       top: 50%;
+      margin-left: 5%;
   }
   #scatterplot {
       display: inline-block;
       width: 43%;
       top: 50%;
-      /* background: blue; */
-      margin: 2% 1% 0 1%;
+      #background: white;
+      margin-left: 5%;
   }
