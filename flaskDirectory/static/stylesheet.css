@@ -1,7 +1,7 @@
 @charset "UTF-8";
 
     input{
-        margin-left: 55%;
+        margin-left: 57%;
     }
     svg {
         font: 10px sans-serif;
@@ -53,7 +53,7 @@
     font-family: Georgia, Cambria, "Times New Roman", Times, serif;
     font-weight: 600;
     font-size: 18px;
-    padding-top: 12px;
+    padding-top: 9px;
     letter-spacing: 0.02em;
     color: snow;
   }
@@ -91,13 +91,11 @@
       width: 40%;
       bottom: 50%;
       margin-left: 5%;
-      #background: red;
   }
 
   #parallelcood {
       display: inline-block;
       width: 40%;
-      #background: green;
       margin-top: 1%;
       bottom: 60%;
       margin-left: 5%;
@@ -106,7 +104,6 @@
   #barchart {
       display: inline-block;
       width: 40%;
-      #background: blue;
       top: 50%;
       margin-left: 5%;
   }
@@ -114,6 +111,5 @@
       display: inline-block;
       width: 43%;
       top: 50%;
-      #background: white;
       margin-left: 5%;
   }

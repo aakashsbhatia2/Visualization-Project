@@ -149,8 +149,6 @@ def prep_map_data():
     maparr = []
 
     for state in featurerecords:
-        if state['features']['properties']['name'] == 'Alaska':
-            print(state['features'])
         maparr.append(state['features'])
 
     mapdata['features'] = maparr
