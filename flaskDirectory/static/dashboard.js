@@ -251,7 +251,7 @@ function usmap() {
     			.attr("width", w - 100)
     			.attr("height", h)
     			.style("fill", "url(#gradient)")
-    			.attr("transform", "translate(60,50)");
+    			.attr("transform", "translate(30,50)");
 
     		var y = d3.scaleLinear()
     			.range([h, 0])
@@ -261,7 +261,7 @@ function usmap() {
 
     		key.append("g")
     			.attr("class", "y axis")
-    			.attr("transform", "translate(101,50)")
+    			.attr("transform", "translate(71,50)")
     			.call(yAxis)
                     resolve();
 
