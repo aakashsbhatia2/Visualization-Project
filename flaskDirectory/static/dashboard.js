@@ -153,6 +153,8 @@ function usmap() {
             for (var d = 0; d < data.length; d++) {
                 dataArray.push(parseFloat(data[d].value))
             }
+            var minVal2 = d3.min(dataArray);
+            var maxVal2 = d3.max(dataArray);
             var minVal = Math.log(d3.min(dataArray));
             var maxVal = Math.log(d3.max(dataArray));
             var ramp = d3.scaleLinear().domain([minVal, maxVal]).range([lowColor, highColor]);
@@ -216,7 +218,53 @@ function usmap() {
                         navbar.innerHTML = d.properties.name + " State Accidents Statistics";
                         showStateBars(d.properties.name);
                     });
+
+
+		var w = 140, h = 300;
+
+    		var key = d3.select("body")
+    			.append("svg")
+    			.attr("width", w)
+    			.attr("height", h)
+    			.attr("class", "legend");
+
+    		var legend = key.append("defs")
+    			.append("svg:linearGradient")
+    			.attr("id", "gradient")
+    			.attr("x1", "100%")
+    			.attr("y1", "0%")
+    			.attr("x2", "100%")
+    			.attr("y2", "100%")
+    			.attr("spreadMethod", "pad");
+
+    		legend.append("stop")
+    			.attr("offset", "0%")
+    			.attr("stop-color", highColor)
+    			.attr("stop-opacity", 1);
+
+    		legend.append("stop")
+    			.attr("offset", "100%")
+    			.attr("stop-color", lowColor)
+    			.attr("stop-opacity", 1);
+
+    		key.append("rect")
+    			.attr("width", w - 100)
+    			.attr("height", h)
+    			.style("fill", "url(#gradient)")
+    			.attr("transform", "translate(60,50)");
+
+    		var y = d3.scaleLinear()
+    			.range([h, 0])
+    			.domain([minVal2, maxVal2]);
+
+    		var yAxis = d3.axisRight(y);
+
+    		key.append("g")
+    			.attr("class", "y axis")
+    			.attr("transform", "translate(101,50)")
+    			.call(yAxis)
                     resolve();
+
             });
         });
     }).then(function() {
